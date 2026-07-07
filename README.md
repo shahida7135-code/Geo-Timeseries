@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Geo + Time Series (DB2)** module is a part of the **AI Ambulance Dispatch System**. It is built using **PostgreSQL**, **PostGIS**, and **TimescaleDB** to store real-time GPS locations of ambulances, perform geographic queries, and generate analytics based on location and time-series data.
+The **Geo + Time Series (DB2)** module is a part of the **AI Ambulance Dispatch System**. It uses **PostgreSQL**, **PostGIS**, and **TimescaleDB** to store real-time ambulance GPS locations, perform geographic queries, and generate analytics based on location and time-series data.
 
 ---
 
@@ -17,14 +17,14 @@ The **Geo + Time Series (DB2)** module is a part of the **AI Ambulance Dispatch 
 
 ## Features
 
-- Stores live ambulance GPS locations
-- Converts GPS data into a TimescaleDB hypertable
-- Performs geographic queries using PostGIS
-- Finds the nearest ambulance to a patient
+- Stores real-time ambulance GPS locations
+- Uses PostGIS for geographic operations
+- Uses TimescaleDB for time-series data management
+- Supports nearest ambulance search
 - Calculates ambulance-to-patient distance
 - Calculates ambulance-to-hospital distance
-- Supports GPS history and tracking
-- Generates analytical reports on ambulance movement
+- Stores GPS history
+- Generates ambulance movement analytics
 
 ---
 
@@ -46,9 +46,7 @@ Geo+Timeseries/
 
 ## Setup Instructions
 
-### Step 1
-
-Enable the required extensions.
+### Step 1: Enable Extensions
 
 Run:
 
@@ -56,11 +54,14 @@ Run:
 2_enable_extensions.sql
 ```
 
+This enables:
+
+- PostGIS
+- TimescaleDB
+
 ---
 
-### Step 2
-
-Create the `location_pings` table.
+### Step 2: Create Table
 
 Run:
 
@@ -68,11 +69,11 @@ Run:
 1_create table
 ```
 
+Creates the `location_pings` table.
+
 ---
 
-### Step 3
-
-Convert the table into a TimescaleDB hypertable.
+### Step 3: Convert to Hypertable
 
 Run:
 
@@ -80,11 +81,11 @@ Run:
 3_create_hypertable.sql
 ```
 
+Converts `location_pings` into a TimescaleDB hypertable.
+
 ---
 
-### Step 4
-
-Create indexes for faster query execution.
+### Step 4: Create Indexes
 
 Run:
 
@@ -92,11 +93,11 @@ Run:
 4_create_indexes.sql
 ```
 
+Creates indexes to improve query performance.
+
 ---
 
-### Step 5
-
-Insert sample GPS data.
+### Step 5: Insert Sample Data
 
 Run:
 
@@ -104,11 +105,11 @@ Run:
 5_sample_data.sql
 ```
 
+Sample GPS records are inserted using **dynamic ambulance IDs** retrieved from the `ambulances` table. This ensures compatibility across different databases without relying on hardcoded UUIDs.
+
 ---
 
-### Step 6
-
-Execute geographic queries.
+### Step 6: Execute Geo Queries
 
 Run:
 
@@ -118,9 +119,7 @@ Run:
 
 ---
 
-### Step 7
-
-Execute analytics queries.
+### Step 7: Execute Analytics Queries
 
 Run:
 
@@ -139,26 +138,26 @@ Stores GPS updates received from ambulances.
 | Column | Description |
 |---------|-------------|
 | ping_id | Unique GPS record ID |
-| ambulance_id | References the Ambulances table |
-| latitude | Ambulance latitude |
-| longitude | Ambulance longitude |
+| ambulance_id | References the `ambulances` table |
+| latitude | Latitude coordinate |
+| longitude | Longitude coordinate |
 | location | PostGIS Geography Point |
-| speed_kmh | Current ambulance speed |
-| heading | Direction of movement |
-| recorded_at | Timestamp of GPS update |
+| speed_kmh | Ambulance speed (km/h) |
+| heading | Direction of movement (degrees) |
+| recorded_at | GPS update timestamp |
 
 ---
 
 ## Geo Queries
 
-This module includes the following geographic queries:
+The following geographic queries are implemented:
 
 - View all GPS records
 - View GPS history of an ambulance
 - View the latest GPS location
 - View GPS records between timestamps
 - Find the nearest ambulance
-- Find ambulances within a specified radius
+- Find ambulances within a 5 km radius
 - Calculate distance between ambulance and patient
 - Calculate distance between ambulance and hospital
 
@@ -181,22 +180,23 @@ The following analytics are implemented:
 
 ## Prerequisites
 
-Before running this module, ensure that:
+Before running DB2, ensure that:
 
 - PostgreSQL 17 is installed.
-- PostGIS extension is enabled.
-- TimescaleDB extension is enabled.
-- The **DB1** module has already been created.
-- The `ambulances`, `emergency_requests`, and `hospitals` tables from DB1 are available.
+- PostGIS extension is available.
+- TimescaleDB extension is installed.
+- DB1 has already been executed successfully.
+- The `ambulances`, `emergency_requests`, and `hospitals` tables exist.
 
 ---
 
 ## Notes
 
-- This module depends on the **DB1** database schema.
+- DB2 depends on the DB1 schema.
 - `ambulance_id` is a foreign key referencing the `ambulances` table.
-- Some analytics require sufficient sample data.
-- Queries such as **Average Response Time** and **Daily Travelled Distance** may return `NULL` if the required timestamp or GPS history data is unavailable.
+- Sample data uses **dynamic ambulance ID selection**, making it portable across different environments.
+- Some analytics, such as **Average Response Time**, depend on timestamp data available in DB1.
+- **Daily Travelled Distance** requires multiple GPS records for the same ambulance to produce non-null results.
 
 ---
 
